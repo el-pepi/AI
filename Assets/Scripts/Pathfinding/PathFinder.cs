@@ -64,6 +64,9 @@ public class PathFinder {
 	}
 
 	public Node[] GetPath(int startX,int startY,int endX,int endY, Algorithm algorithm){
+        closedNodes.Clear();
+        openNodes.Clear();
+
 		this.endX = endX;
 		this.endY = endY;
 
