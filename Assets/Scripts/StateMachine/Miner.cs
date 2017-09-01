@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class Miner : MonoBehaviour {
@@ -26,17 +27,20 @@ public class Miner : MonoBehaviour {
     float timer = 1f;
     int baseX;
     int baseY;
+    int nodeIndex;
 
     PathFinder pathFinder;
 
     List<Node> nodes;
 
+    public Text info;
     public Rock rock;
     public float walkSpeed = 3;
     public int bagSize = 3;
     public int carrying = 0;
 
-	void Start () {
+
+	public void Init () {
         baseX = Mathf.RoundToInt(transform.position.x);
         baseY = Mathf.RoundToInt(transform.position.y);
 
@@ -53,6 +57,7 @@ public class Miner : MonoBehaviour {
 
         pathFinder = new PathFinder();
         pathFinder.Init(Map.tiles, Map.weights);
+        nodes = new List<Node>(pathFinder.GetPath(baseX, baseY, Mathf.RoundToInt(rock.transform.position.x), Mathf.RoundToInt(rock.transform.position.y), PathFinder.Algorithm.AStar));
     }
 
     void Update () {
@@ -68,9 +73,13 @@ public class Miner : MonoBehaviour {
                 UpdateMinning();
                 break;
             case states.goingToBase:
-                UpdateGoingMine();
+                UpdateGoingToBase();
+                break;
+            case states.dumping:
+                UpdateDumping();
                 break;
         }
+        info.text = "Gold on rock: " + rock.ammount + "\nCarrying: " + carrying + "/" + bagSize;
 	}
 
     float UpdateTimer()
@@ -90,7 +99,7 @@ public class Miner : MonoBehaviour {
 
             if (rock.ammount > 0)
             {
-                nodes = new List<Node>(pathFinder.GetPath(baseX, baseY, Mathf.RoundToInt(rock.transform.position.x),Mathf.RoundToInt(rock.transform.position.y),PathFinder.Algorithm.AStar));
+                nodeIndex = nodes.Count - 1;
                 state = (states)stateMachine.SendEvent((int)events.foundGold);
             }
         }
@@ -98,18 +107,35 @@ public class Miner : MonoBehaviour {
 
     void UpdateGoingMine()
     {
-        if (nodes.Count == 0)
-        {
-            return;
-        }
-        Node n = nodes[nodes.Count - 1];
+        Node n = nodes[nodeIndex];
         Vector3 dir = new Vector3(n.x, n.y, 0) - transform.position;
 
         if((dir.normalized * walkSpeed * Time.deltaTime).magnitude >= dir.magnitude )
         {
             transform.position += dir;
-            nodes.Remove(n);
-            if (nodes.Count == 0)
+            nodeIndex--;
+            if (nodeIndex == -1)
+            {
+                nodeIndex = 0;
+                state = (states)stateMachine.SendEvent((int)events.done);
+            }
+        }
+        else
+        {
+            transform.position += (dir).normalized * walkSpeed * Time.deltaTime;
+        }
+    }
+
+    void UpdateGoingToBase()
+    {
+        Node n = nodes[nodeIndex];
+        Vector3 dir = new Vector3(n.x, n.y, 0) - transform.position;
+
+        if ((dir.normalized * walkSpeed * Time.deltaTime).magnitude >= dir.magnitude)
+        {
+            transform.position += dir;
+            nodeIndex++;
+            if (nodeIndex == nodes.Count)
             {
                 state = (states)stateMachine.SendEvent((int)events.done);
             }
@@ -118,8 +144,6 @@ public class Miner : MonoBehaviour {
         {
             transform.position += (dir).normalized * walkSpeed * Time.deltaTime;
         }
-
-        state = (states)stateMachine.SendEvent((int)events.foundGold);
     }
 
     void UpdateMinning()
@@ -134,14 +158,33 @@ public class Miner : MonoBehaviour {
                 carrying++;
                 if (carrying >= bagSize)
                 {
-                    nodes = new List<Node>(pathFinder.GetPath(Mathf.RoundToInt(rock.transform.position.x), Mathf.RoundToInt(rock.transform.position.y), baseX, baseY, PathFinder.Algorithm.AStar));
                     state = (states)stateMachine.SendEvent((int)events.done);
                 }
             }
             else
             {
-                nodes = new List<Node>(pathFinder.GetPath(Mathf.RoundToInt(rock.transform.position.x), Mathf.RoundToInt(rock.transform.position.y), baseX, baseY, PathFinder.Algorithm.AStar));
                 state = (states)stateMachine.SendEvent((int)events.done);
+            }
+        }
+    }
+
+    void UpdateDumping()
+    {
+        if (UpdateTimer() <= 0)
+        {
+            timer = 1;
+            carrying--;
+            if (carrying <= 0)
+            {
+                if (rock.ammount>0)
+                {
+                    nodeIndex = nodes.Count - 1;
+                    state = (states)stateMachine.SendEvent((int)events.foundGold);
+                }
+                else
+                {
+                    state = (states)stateMachine.SendEvent((int)events.goldFinished);
+                }
             }
         }
     }
