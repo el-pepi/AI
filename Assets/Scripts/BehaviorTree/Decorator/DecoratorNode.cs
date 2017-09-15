@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DecoratorNode : BTNode {
+public abstract class DecoratorNode : BTNode {
 
-	public override bool AddChild (BTNode node)
+	protected override bool AddChild (BTNode node)
 	{
 		if (Children.Count == 0) {
 			return base.AddChild (node);
