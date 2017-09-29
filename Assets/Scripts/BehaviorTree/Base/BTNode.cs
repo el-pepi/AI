@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class BTNode {
+public abstract class BTNode<T> where T : class{
 
 	public enum State
 	{
@@ -12,26 +12,26 @@ public abstract class BTNode {
 		Fail
 	}
 
-    List<BTNode> children = new List<BTNode>();
+	protected T _blackBoard;
 
-	protected List<BTNode> Children
-    {
-        get
-        {
-            return children;
-        }
-    }
-
-	protected virtual bool AddChild(BTNode node)
-    {
-        children.Add(node);
-        return true;
-    }
+	public void SetBlackBoard(T blackBoard){
+		_blackBoard = blackBoard;
+	}
 
 	protected abstract State OnUpdate ();
+	protected virtual void Awake (){}
+	protected virtual void Sleep (){}
+
+	State actualState = State.None;
 
 	public State Update(){
-		return OnUpdate ();
+		if (actualState == State.None) {
+			Awake ();
+		}
+		actualState = OnUpdate ();
+		if (actualState != State.InProgress) {
+			Sleep ();
+		}
+		return actualState;
 	}
 }
-//TODO: terminar Update, llama awake y sleep cuando es necesario. Sacar children de node base. Hacer funcion Reset.

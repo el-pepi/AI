@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class LogicNode : BTNode {
+public abstract class LogicNode<T> : BTNodeWithChildren<T> where T : class{
 
-	protected override bool AddChild (BTNode node)
+	public override bool AddChild (BTNode<T> node)
 	{
-		if (node is ConditionalNode || node is DecoratorNode) {
+		if (node is ConditionalNode<T> || node is DecoratorNode<T>) {
 			if (Children.Count < 2) {
 				return base.AddChild (node);
 			}

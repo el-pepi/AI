@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OrNode : LogicNode {
+public class OrNode<T> : LogicNode<T> where T : class{
 
 	protected override State OnUpdate ()
 	{
-		foreach (BTNode n in Children) {
+		foreach (BTNode<T> n in Children) {
 			if (n.Update () == State.Success) {
 				return State.Success;
 			}

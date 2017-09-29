@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NotNode : DecoratorNode {
+public class NotNode<T> : DecoratorNode<T> where T : class{
 
 	protected override State OnUpdate ()
 	{

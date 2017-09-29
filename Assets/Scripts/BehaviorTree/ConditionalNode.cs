@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ConditionalNode : BTNodeNoChild {
+public abstract class ConditionalNode<T> : BTNode<T> where T : class{
 	protected override State OnUpdate ()
 	{
 		if (Evaluate ()) {
