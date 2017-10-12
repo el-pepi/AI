@@ -13,7 +13,7 @@ public class SequencerNode<T> : BTNodeWithChildren<T> where T : class{
 			if (s == State.InProgress) {
 				lastIndex = i;
 			}
-			if(Children[i].Update() != State.Success){
+			if(s != State.Success){
 				return s;
 			}
 		}

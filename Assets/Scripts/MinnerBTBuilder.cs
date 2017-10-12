@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MinnerBTBuilder : MonoBehaviour {
+public class MinnerBTBuilder {
 	
-	public SequencerNode<MinnerBlackboard> Build(MinnerBlackboard blackboard){
+	public static SequencerNode<MinnerBlackboard> Build(MinnerBlackboard blackboard){
 		SequencerNode<MinnerBlackboard> root = new SequencerNode<MinnerBlackboard> ();
 		root.SetBlackBoard (blackboard);
 
@@ -14,17 +14,21 @@ public class MinnerBTBuilder : MonoBehaviour {
 				findRocks.AddChild (rockChecker);
 				BagSpaceCheckNode<MinnerBlackboard> bagChecker = new BagSpaceCheckNode<MinnerBlackboard> ();
 				findRocks.AddChild (bagChecker);
+				GoToRocksNode<MinnerBlackboard> goToRocks = new GoToRocksNode<MinnerBlackboard> ();
+				findRocks.AddChild (goToRocks);
+				GetRocksNode<MinnerBlackboard> getRocks = new GetRocksNode<MinnerBlackboard> ();
+				findRocks.AddChild (getRocks);
 
+			SequencerNode<MinnerBlackboard> goBack = new SequencerNode<MinnerBlackboard> ();
+			root.AddChild (goBack);
+				HasRocksCheckNode<MinnerBlackboard> hasRocks = new HasRocksCheckNode<MinnerBlackboard> ();
+				goBack.AddChild (hasRocks);
+				GoToHomeNode<MinnerBlackboard> goHome = new GoToHomeNode<MinnerBlackboard> ();
+				goBack.AddChild (goHome);
+				DropRocksNode<MinnerBlackboard> dropRocks = new DropRocksNode<MinnerBlackboard> ();
+				goBack.AddChild (dropRocks);
+				
 
 		return root;
 	}
 }
-/*TODO:
- * 					->
- * (empiezo, busco y mino)				(termino de minar, si tengo algo, vuelvo a base)
- * ->									->
- * hay? espacio? Ir! Minar!				tengo? Ir! Dejar!	
- * 
- * 
- * 
- * /

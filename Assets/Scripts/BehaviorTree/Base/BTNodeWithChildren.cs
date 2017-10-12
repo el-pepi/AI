@@ -8,6 +8,7 @@ public abstract class BTNodeWithChildren<T> : BTNode<T> where T : class{
 
 	public virtual bool AddChild(BTNode<T> node)
 	{
+		node.SetBlackBoard (_blackBoard);
 		children.Add(node);
 		return true;
 	}
